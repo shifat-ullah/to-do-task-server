@@ -50,24 +50,24 @@ async function run() {
         // task
 
         app.post('/api/tasks', async (req, res) => {
-            const formData=req.body;
-            const result =await taskCollection.insertOne(formData);
+            const formData = req.body;
+            const result = await taskCollection.insertOne(formData);
             console.log(result);
             res.send(result)
-          });
+        });
 
 
-          app.get('/api/tasks', async (req, res) => {
+        app.get('/api/tasks', async (req, res) => {
             const tasks = await taskCollection.find().toArray();
             res.json(tasks);
-          });
+        });
 
-          app.put('/api/tasks/:id', async (req, res) => {
+        app.put('/api/tasks/:id', async (req, res) => {
             const taskId = req.params.id;
             const { status } = req.body;
-        
+
             const updateStatus = { $set: { status: status } };
-        
+
             try {
                 const result = await taskCollection.updateOne({ _id: new ObjectId(taskId) }, updateStatus);
                 if (result.matchedCount === 0) {
@@ -80,20 +80,46 @@ async function run() {
                 res.status(500).send({ error: 'An error has occurred' });
             }
         });
-        
-        
-        
-          
-          app.delete('/api/tasks/:id', async (req, res) => {
+
+
+
+
+        app.delete('/api/tasks/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id : new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const result = await taskCollection.deleteOne(query);
             console.log(result)
             res.send(result)
-          });
+        });
 
 
+        // get update user data
+        app.get('/user/update/:id', async (req, res) => {
+            const id = req.params.id;
+            const result = await userCollection.findOne({ _id: new ObjectId(id) })
+            res.send(result)
+        })
 
+        // get user data
+
+        app.get('/user/:email', async (req, res) => {
+            const email = req.params.email;
+            const result = await userCollection.findOne({ email })
+            res.send(result)
+        })
+
+
+        // patch updated data
+    app.patch('/user/:email',  async (req, res) => {
+        const email = req.params.email;
+        const userData = req.body;
+  
+  
+        const result = await userCollection.updateOne({ email }, { $set: userData }, { upsert: true });
+        res.send(result)
+  
+      })
+  
 
 
         // Send a ping to confirm a successful connection
